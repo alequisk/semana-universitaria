@@ -1,0 +1,146 @@
+\documentclass[12pt]{article}
+\usepackage{sbc-template}
+
+\usepackage{graphicx,url}
+\usepackage[brazil]{babel}   
+\usepackage[utf8]{inputenc}  
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage[pdftex]{hyperref}
+
+\sloppy
+
+\title{Resolução do problema `Arte Valiosa' utilizando \\a estrutura de dados Disjoint Set Union (DSU)}
+
+\author{Álex Sousa Cruz\inst{1}, Wladimir Araujo Tavares\inst{1}}
+
+\address{
+    Universidade Federal do Ceara (UFC) - Campus Quixadá\\
+    Av. Jose de Freitas Queiroz, 5003 – Cedro, 63902-580 - Quixadá-CE
+  \email{\{alexsousa1435, wladimirufc\}@gmail.com}
+}
+
+\begin{document} 
+
+\maketitle
+
+\begin{abstract}
+  This article describes a possible solution to the ``Arte valiosa'' problem in
+  regional phase of the 2019 XXIV Maratona de programação da SBC. The approach
+  used to solve the problem is to reduce the problem that apparently
+  would be from geometry to just a simple set using parsing
+  the DSU data structure to facilitate finding the answer.
+\end{abstract}
+     
+\begin{resumo} 
+  Este artigo descreve uma solução possível para o problema ``Arte Valiosa'' da
+  fase regional da XXIV Maratona de programação da SBC 2019. Nela a abordagem
+  usada para resolução do problema é reduzir o problema que aparentemente
+  seria de geometria para apenas uma análise simples de conjuntos usando
+  a estrutura de dados DSU para facilitar o encontro da resposta.
+\end{resumo}
+
+
+\section{Introdução}
+
+Anualmente ocorre o evento chamado Maratona de Programação organizada pela Sociedade Brasileira de Computação (SBC) e neste evento existente desde o ano de 1996 é realizada uma prova modo contest com vários problemas de computação para ser realizada por equipes de três membros durante cinco horas e que por meio de um computador deverão escrever soluções para os problemas computacionais presentes nesta prova.
+
+No ano de 2019 foi realizada a XXIV Maratona de Programação da SBC que trazia logo de início o problema ''Arte Valiosa`` que durante o contest foram submetidas 482 tentativas de acerto e apenas 106 foram consideradas corretas pelo judge BOCA de um total de 687 equipes participantes. Por ser um problema que requer uma interpretação geométrica para ser solucionado é justificável as poucas respostas aceitas durante a prova.
+
+Brevemente o problema descreve as dimensões de um salão retangular onde existe uma entrada e transversalmente na outra extremidade uma arte valiosa. Nesse salão há também sensores que conseguem detectar a presença de alguém até determinado raio porém o tamanho desse raio é específico para cada sensor. Sabendo que as posições da arte e a entrada são fixas, deve-se determinar se há como alguém roubar a arte valiosa sem que seja detectado pelos sensores. 
+
+O método utilizado para a solução desse problema foi feito através da percepção que a resposta pode ser dada analisando os limites dos raios presentes no sensores e a intersecção deles. Assim, criando um conjunto de sensores que se intersectam podemos armazenas os limites deles e analisar junto com a dimensão do salão.
+\section{Preliminares} \label{sec:preliminares}
+
+O algoritmo Disjoint Set Union ou também conhecido como UnionFind por conta das sua principal funcionalidade é uma estrutura de dados muito poderosa para quando precisamos trabalhar com as operações de unir conjuntos e buscar a que conjunto ele pertence \cite{emaxx:19}.
+
+A ideia dele é fazer com que cada elemento seja um nó de uma árvore e ao usar os métodos para unir os conjuntos os nós serão conectadas apontando para um nó pai. Esse nó pai representará todo o conjunto. Com essa ideia precisamos apenas de um vetor de `pais' onde cada elemento inicialmente aponta para ele mesmo, sendo ele o próprio representando do seu conjunto e quando unimos dois conjuntos escolhemos um dos `pais' para apontar para o outro elemento. Quando precisamos buscar o elemento que representa o conjunto precisamos apenas buscar quando o pai de um determinado elemento é ele mesmo,  caso contrário eu verifico quem é o pai que aponta aquele elemento.
+
+Ao fazer várias operações de união, pode-se perceber que o tamanho da árvore gerada por essas operações se torna tão qual a quantidade de elementos que a formam, fazendo com que a operação \textit{find} custe tanto quando salvar todos os conjuntos em um \textit{array} só. Para isso é feito otimização no método de união para que o custo de se buscar o pai do subset seja tão desprezável ao ponto de ter uma complexidade próximo a $O(1)$ \cite{emaxx:19}.
+
+A abordagem utilizada para que tenha o desempenho desejado será otimização pelo nível das árvores como `rank', também conhecido como \textit{Union By Rank}. Nessa otimização, o \textit{rank} inicial de todos os elementos são $0$ e quando é efetuada a união de dois elementos, será atribuído o pai aquele que tiver menor rank, que consequentemente levará menos operações de \textit{find} para poder chegar no valor absoluto do pai. Após isso é acrescido 1 se os elementos tiverem o mesmo valor de \textit{rank}.   
+\section{Descrição do Problema}
+A Mona Dura é uma das obras de arte mais valiosas do museu da Nlogônia. A famosa pintura fica em exibição num salão retangular de $M$ por $N$ metros. A entrada do salão fica em um canto, e a Mona fica no canto diagonalmente oposto à entrada.
+
+Para impedir roubos, o salão dispõe de sensores de movimento, que são ativados toda noite quando o museu fecha. Cada sensor tem um valor de sensibilidade $S_i$, tal que o sensor dispara um alarme se detectar qualquer movimento a no máximo $S_i$ metros de distância dele.
+
+Um ladrão invadiu o museu esta noite com a intenção de roubar a Mona Dura. Para isso, ele precisa entrar no salão e chegar até a pintura sem ser detectado por nenhum sensor de movimento. Ou seja, ele tem que manter uma distância maior do que $S_i$ metros do i-ésimo sensor o tempo todo, para todos os sensores.
+
+O ladrão obteve acesso às plantas do museu, e portanto sabe as dimensões do salão e as coordenadas e sensibilidades de cada um dos sensores. Dadas essas informações, sua tarefa é determinar se o roubo é possível ou não.
+
+\section*{Entrada}
+
+A primeira linha contém três inteiros, $M$, $N$ e $K$, as dimensões do salão e o número de sensores de movimento, respectivamente ($10 \leq M, N \leq 10^4 , 1 \leq K \leq 1000$). A entrada do salão fica no ponto (0, 0) e a pintura fica no ponto ($M$, $N$).
+
+Cada uma das $K$ linhas seguintes corresponde a um dos $K$ sensores e contém três inteiros, $X$, $Y$ e $S$, onde ($X, Y$) indica a localização do sensor e S indica a sua sensibilidade ($0 < X < M, 0 < Y < N, 0 < S \leq 10^4$). Todas as dimensões e coordenadas da entrada são em metros. É garantido que todos os sensores têm coordenadas distintas.
+
+\section*{Saída}
+
+Seu programa deve produzir uma única linha contendo o caractere `S' caso seja for possível roubar a pintura, ou o caractere `N' caso contrário.
+
+\section{Solucionando o problema com DSU}
+
+Primeiramente para solucionar o problema pensaremos em que casos o ladrão será impedido de passar pela sala com dois sensores. Caso haja espaço entre dois sensores o ladrão consegue passar, caso contrário ele será identificado. Para que não exista espaço para que ele não passe precisamos que os raios dos sensores toquem as bordas do salão e também toquem ambos os sensores de tal forma que é formado uma barreira que impede de chegar ao ponto $M$, $N$. Analisando isso, é possível ver que os casos que essa barreira é formada será quando um conjunto de sensores que estão em intersecção tocam quando:
+\begin{itemize}
+\label{tabelasolucao}
+    \item O raio de um conjunto de sensores que se intersectam toca a \textbf{borda esquerda} e a \textbf{borda superior} do salão;
+    \item O raio de um conjunto de sensores que se intersectam toca a \textbf{borda esquerda} e a \textbf{borda direita} do salão;
+    \item O raio de um conjunto de sensores que se intersectam toca a \textbf{borda inferior} e a \textbf{borda superior} do salão;
+    \item O raio de um conjunto de sensores que se intersectam toca a \textbf{borda inferior} e a \textbf{borda direita} do salão.
+\end{itemize} 
+
+Conhecendo esses quatro casos, podemos utilizar a estrutura DSU para que seja criado conjuntos de sensores que se intersectam e agrupá-los em um mesmo conjunto e após isso podemos efetuar a análise de todos eles. Inicialmente podemos iniciar a DSU dizendo que cada sensor faz parte de um conjunto isolado dos outros.
+
+Sendo assim, o primeiro passo será conhecer quais pares de sensores tem essa propriedade. Para isso olharemos os pares $i, j$ tal que $1 \leq i, j \leq K, i \neq j$ e também criar uma função \textit{intersec(i, j)} que verifica se dois sensores se intersectam. Caso se intersectam eles serão unidos pelo método \textit{union\_sets(i,j)} da estrutura de dados DSU. Após isso podemos tratar cada subconjunto buscando os limites inferiores, superiores, lateral direito e esquerdo dos sensores pela seguinte relação: 
+\begin{itemize}
+    \item Limite inferior (\textit{MaxY}): coordenada cartesiana Y + raio do sensor $i$;
+    \item Limite superior (\textit{MinY}): coordenada cartesiana Y - raio do sensor $i$;
+    \item Limite lateral esquerdo (\textit{MinX}): coordenada cartesiana X - raio do sensor $i$;
+    \item Limite lateral direito (\textit{MaxX}): coordenada cartesiana X + raio do sensor $i$.
+\end{itemize}
+
+Com esses dados podemos utilizar o método de verificação descrito anteriormente juntamente com a estrutura DSU e solucionar o problema.
+
+\begin{algorithm}[ht]
+    \caption{Solução para o problema `Arte valiosa'}
+    \label{pseudocode}
+    \begin{algorithmic}[1]
+       \FORALL {$s$ in $S$}
+           \STATE make\_pair($s$)
+       \ENDFOR
+       \FORALL {$j$ in $S$}
+            \FORALL{$i$ in $S$}
+                \IF{$i \neq j$}
+                    \IF{intersec($i$, $j$)}
+                        \STATE union\_sets($i$, $j$)
+                    \ENDIF
+                \ENDIF
+            \ENDFOR
+       \ENDFOR
+       \STATE answer := `S'
+       \FORALL{$subset$ in $DSU$}
+           \FORALL{$s$ in $subset$}
+               \STATE minX := min(s.x - s.radius, minX)
+               \STATE minY := min(s.y - s.radius, minY)
+               \STATE maxX := max(s.x + s.radius, maxX)
+               \STATE maxY := max(s.y + s.radius, maxY)
+           \ENDFOR
+           \IF{(minX $\leq$ 0 \textbf{and} (minY $\leq$ \textbf{or} maxX $\geq$ N)) \textbf{or} (maxY $\geq$ M \textbf{and} (maxY $\leq$ 0 \textbf{or} maxX $\geq$ N))}
+            \STATE answer := `N'
+           \ENDIF
+       \ENDFOR
+    \end{algorithmic}
+\end{algorithm}
+
+\section{Conclusão}
+Através da metodologia abordada no problema, conseguiu-se obter êxito na criação de uma solução do problema que apareceu na XXIV Maratona de Programação da SBC de 2019 `Arte Valiosa'. Utilizando os passos descritos no pseudocódigo \ref{pseudocode} foi escrito uma versão na linguagem C++ e submetida no juiz online \textit{beecrowd} que foi aceita dentro da plataforma dentro dos limites de tempo de execução e memória. O código-fonte também pode ser visto em um \hypertarget{https://github.com/alequisk/semana-universitaria}{repositório} da escrita desse artigo.
+
+\bibliographystyle{sbc}
+\bibliography{sbc-template}
+
+\end{document}
+
+
+% https://maratona.sbc.org.br/hist/2019/primfase19/reports/ScoreBrasil.html
+% https://maratona.sbc.org.br/hist/2019/primfase19/reports/Statistic.html
